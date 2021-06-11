@@ -1,5 +1,11 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController,Platform,AlertController } from 'ionic-angular';
+import {Http, Headers } from '@angular/http';
+
+
+import { OtpReceivePage } from '../otp-receive/otp-receive';
+import 'rxjs/add/operator/map';
+
 
 @Component({
   selector: 'page-home',
@@ -7,8 +13,39 @@ import { NavController } from 'ionic-angular';
 })
 export class HomePage {
 
-  constructor(public navCtrl: NavController) {
+  mobile='';  
+  constructor(public alertCtrl: AlertController,
+    public http:Http,
+  public navCtrl:NavController) {
+    
 
-  }
+
+      }
+    
+    sendOTP()
+    {
+
+      if(this.mobile.length!=12)
+      {
+        let alert = this.alertCtrl.create({
+          title: 'Mobile Number Required!',
+          subTitle: 'Please enter your 10 digit mobile number with 91 country code!',
+          buttons: ['OK']
+        });
+        alert.present();
+      }
+      else
+      {
+        this.http.get('http://192.168.0.100/nexmosms/send-sms.php?mobile='+this.mobile)
+        .map(res => res.json())
+        .subscribe(res => {
+        
+        console.log(JSON.stringify(res));
+        this.navCtrl.push(OtpReceivePage,{mobileno:this.mobile})
+        }, (err) => {
+        alert("failed");
+        });
+      }
+    }
 
 }
